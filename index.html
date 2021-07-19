@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Websocket Client</title>
+</head>
+<body>
+  <script>
+    const url    = "ws://0.0.0.0:4411"    
+    const socket = new WebSocket(url)
+
+    socket.addEventListener('open', () => {
+      document.querySelector('#status').innerText = 'connected'
+      socket.send("Can you hear me?")
+    })
+
+    socket.addEventListener('close', () => {
+      document.querySelector('#status').innerText = 'disconnected'
+      setTimeout(connect, 1000);
+    })
+
+    socket.addEventListener('message', () => {
+      document.querySelector('#msg').innerText = event.data
+    })
+
+    socket.addEventListener('error', (event) => console.log(event))
+  </script>
+  <h1 id="status">disconnected</h1>
+  <h1 id="msg"></h1>
+</body>
+</html>

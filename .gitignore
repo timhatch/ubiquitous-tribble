@@ -1,0 +1,9 @@
+# MacOS files
+.DS_Store
+
+# local gems 
+vendor
+
+# vim temp files
+*.swp
+*.swo
