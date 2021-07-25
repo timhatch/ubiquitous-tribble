@@ -7,3 +7,7 @@ vendor
 # vim temp files
 *.swp
 *.swo
+
+# Ignore CSV data analysis files
+constant_interval
+variable_interval
