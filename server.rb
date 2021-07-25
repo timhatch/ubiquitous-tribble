@@ -2,36 +2,21 @@
 
 require 'bundler/setup'
 require 'tipi'
-require 'tipi/websocket'
 
-def countdown(conn)
-  spin_loop(interval: 1) do
-    t = Time.now
-    conn << "#{format('%02d', t.min.remainder(4))}:#{format('%02d', t.sec)}:#{t.nsec}"
-  end
-end
+require_relative 'ws_handler'
 
-def ws_handler(conn)
-  puts 'handler called'
-  timer = countdown(conn)
+puts "pid: #{Process.pid}"
+puts 'Listening on port 4411...'
 
-  while (msg = conn.recv)
-    conn << "you said: #{msg}"
-  end
-rescue Exception => e
-  p e
-ensure
-  timer.stop
-end
+ws = WSHandler.new
 
 opts = {
   reuse_addr: true,
   dont_linger: true,
-  upgrade: { websocket: Tipi::Websocket.handler(&method(:ws_handler)) }
+  upgrade: {
+    websocket: Tipi::Websocket.handler { ws.handler(_1) }
+  }
 }
-
-puts "pid: #{Process.pid}"
-puts 'Listening on port 4411...'
 
 app = Tipi.route do |r|
   r.on_root do
