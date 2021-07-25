@@ -5,24 +5,28 @@
 </head>
 <body>
   <script>
-    const url    = "ws://0.0.0.0:4411"    
-    const socket = new WebSocket(url)
+    function socket () {
+      const url = "ws://0.0.0.0:4411"
+      const ws  = new WebSocket(url)
 
-    socket.addEventListener('open', () => {
-      document.querySelector('#status').innerText = 'connected'
-      socket.send("Can you hear me?")
-    })
+      ws.onopen = () => {
+        document.querySelector('#status').innerText = 'connected'
+        ws.send("timer")
+      }
 
-    socket.addEventListener('close', () => {
-      document.querySelector('#status').innerText = 'disconnected'
-      setTimeout(connect, 1000);
-    })
+      ws.onclose = () => {
+        document.querySelector('#status').innerText = 'disconnected'
+        setTimeout(socket, 1000);
+      }
 
-    socket.addEventListener('message', () => {
-      document.querySelector('#msg').innerText = event.data
-    })
+      ws.onmessage = (event) => {
+        console.log
+        document.querySelector('#msg').innerText = event.data
+      }
 
-    socket.addEventListener('error', (event) => console.log(event))
+      ws.onerror = (event) => console.log(event)
+    }
+    socket()
   </script>
   <h1 id="status">disconnected</h1>
   <h1 id="msg"></h1>
