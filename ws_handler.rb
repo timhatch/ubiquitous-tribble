@@ -9,7 +9,7 @@ class WSHandler
   def initialize
     @clients = []
     spin do
-      @timer = Timer.new(strategy: 'elapsed', rotation: 1000, climbing: 1000, start_at: '21:44')
+      @timer = Timer::Clock.new(strategy: 'elapsed', rotation: 1000, climbing: 1000, start_at: nil)
       @timer.run { broadcast }
     end
   end
