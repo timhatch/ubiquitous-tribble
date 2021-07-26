@@ -8,8 +8,10 @@ require_relative 'timer'
 class WSHandler
   def initialize
     @clients = []
-    @timer   = Timer.new(strategy: 'rotation', rotation: 75, climbing: 60, start_at: nil)
-    broadcast_loop
+    spin do
+      @timer = Timer.new(strategy: 'elapsed', rotation: 1000, climbing: 1000, start_at: '21:44')
+      @timer.run { broadcast }
+    end
   end
 
   def handler(conn)
@@ -27,19 +29,15 @@ class WSHandler
   end
   # rubocop:enable Lint/RescueException
 
-  def broadcast_loop
-    spin do
-      @timer.run do
-        @clients.each.with_index do |c, _i|
-          c << diagnostics.call(@timer)
-          # Print diagnostic data
-          # open("conn_#{i}", 'a') { _1.puts diagnostics.call(@timer) }
-        end
-      end
+  def broadcast
+    @clients.each.with_index do |c, i|
+      c << diagnostics.call(@timer)
+      # Print diagnostic data
+      open("conn_#{i}", 'a') { _1.puts diagnostics.call(@timer) }
     end
   end
 
   def diagnostics
-    ->(t) { "#{t.strtime}, #{'%.5f' % t.seconds}, #{Process.clock_gettime(Process::CLOCK_MONOTONIC) % 1}" }
+    ->(t) { "#{t.strtime}, #{'%.5f' % t.seconds}, #{Process.clock_gettime(Process::CLOCK_MONOTONIC)}" }
   end
 end
