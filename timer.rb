@@ -4,6 +4,7 @@ module TimerStrategy
   # One shot elapsed timer: decrements the clock until the climbing time is finished.
   # If the elapsed time exceeds the climbing time, return the climbing time
   # therwise return the elapsed time (auto incrementing via the calling loop).
+  # FIXME: Does not handle future start times
   class Elapsed
     def self.seconds(_current, elapsed, _rotation, climbing)
       if elapsed.to_i > climbing
@@ -61,7 +62,6 @@ class Timer
     'elapsed' => TimerStrategy::Elapsed
   }
 
-  # FIXME: Why are we even passing a `seconds` parameter?
   def initialize(strategy:, rotation:, climbing:, start_at: nil)
     @rotation = rotation
     @climbing = climbing
@@ -74,17 +74,15 @@ class Timer
   def run
     loop do
       # Calculate the elapsed time of the rotation
-      current_seconds = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      elapsed_seconds = (current_seconds - @start_at)
-
       # calculate the remaining time
-      seconds!(elapsed_seconds)
+      elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - @start_at
+      seconds!(elapsed)
+
       # allow external processing of computed data
       yield if block_given?
 
       # Calculate the timeout interval and sleep the thread
-      # timeout_seconds = 1.0 - elapsed_seconds.modulo(1)
-      sleep(1)
+      sleep(1.0 - elapsed.remainder(1))
     end
   end
 
@@ -109,7 +107,7 @@ class Timer
   # If a time is given, set the start time with an offset into the future
   def start(start_at)
     Process.clock_gettime(Process::CLOCK_MONOTONIC) +
-      (start_at.nil? ? 0 : [Time.parse(start_at) - Time.now, 0].max)
+      (start_at.nil? ? 0.0 : [Time.parse(start_at) - Time.now, 0.0].max)
   rescue ArgumentError, TypeError => e
     puts "Error: #{e}"
     exit
