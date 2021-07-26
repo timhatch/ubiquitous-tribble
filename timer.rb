@@ -76,9 +76,9 @@ class Timer
       # Calculate the elapsed time of the rotation
       # calculate the remaining time
       elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - @start_at
-      seconds!(elapsed)
 
       # allow external processing of computed data
+      @seconds = @strategy.seconds(@seconds, elapsed, @rotation, @climbing)
       yield if block_given?
 
       # Calculate the timeout interval and sleep the thread
@@ -90,10 +90,6 @@ class Timer
     @seconds  = @strategy.reset(@climbing)
     @start_at = start(nil)
     yield if block_given?
-  end
-
-  def seconds!(elapsed)
-    @seconds = @strategy.seconds(@seconds, elapsed, @rotation, @climbing)
   end
 
   # Getter
