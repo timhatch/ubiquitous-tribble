@@ -20,12 +20,13 @@ class WSHandler
         @clients << conn
       else
         p conn.recv
-        @clients.delete(conn)
       end
     end
   # rubocop:disable Lint/RescueException
   rescue Exception => e
     p e
+  ensure
+    @clients.delete(conn)
   end
   # rubocop:enable Lint/RescueException
 
