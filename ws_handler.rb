@@ -3,7 +3,7 @@
 require 'tipi'
 require 'tipi/websocket'
 
-require_relative 'timer'
+require_relative 'timer_clock'
 
 class WSHandler
   def initialize
